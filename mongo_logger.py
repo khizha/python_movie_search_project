@@ -109,7 +109,7 @@ def get_popular_searches() -> list[dict[str, Any]]:
             },
             {
                 "$sort": {
-                   "count": -1
+                   "requests_count": -1
                 }
             },
             {

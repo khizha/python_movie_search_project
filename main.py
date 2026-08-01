@@ -7,11 +7,18 @@ from rich.panel import Panel
 # Align отвечает за выравнивание текста и объектов
 from rich.align import Align
 
+# Table создает таблицы
+from rich.table import Table
+
 import os
 
 
 from mysql_connector import get_films_by_keyword
 from mysql_connector import get_categories_with_years
+from mysql_connector import get_films_by_category_id_and_year
+
+from mongo_logger import get_recent_searches
+from mongo_logger import save_search_log
 
 # Создаем объект консоли
 # Через него будем выводить все элементы Rich
@@ -35,11 +42,11 @@ def show_menu():
     # Создаем текстовое содержимое меню
     menu = (
         "1. Поиск по ключевому слову\n"
-        "2. Поиск по жанру\n"
-        "3. Список годов\n"
-        "4. Список жанров\n"
-        "5. Последние запросы\n"
-        "6. Популярные запросы\n"
+        "2. Поиск по жанру  и диапазону годов выпуска\n"
+        #"3. Список годов\n"
+        #"4. Список жанров\n"
+        "3. Последние запросы\n"
+        "4. Популярные запросы\n"
         "\n"
         "0. Выход"
     )
@@ -89,15 +96,15 @@ def main() -> None:
         choice = input("\nВыберите пункт меню: ")
 
         if choice == "1":
-            search_by_keyword()
+            show_search_by_keyword()
 
         elif choice == "2":
-            search_by_category()
+            show_search_by_category()
             #pass
 
         elif choice == "3":
-            #show_years()
-            pass
+            show_recent_searches()
+            #pass
 
         elif choice == "4":
             #show_categories()
@@ -111,10 +118,16 @@ def main() -> None:
         console.input("\nНажмите Enter для возврата в меню...")
 
 
-def search_by_keyword():
+def show_search_by_keyword():
 
     keyword = input("\nВведите ключевое слово: ")
     films = get_films_by_keyword(keyword)
+
+    save_search_log(
+        search_type="keyword",
+        search_params={"keyword": keyword},
+        results_count=len(films)
+    )
     if not films:
         print("\nНичего не найдено.")
     else:
@@ -123,7 +136,7 @@ def search_by_keyword():
 
     #input("\nНажмите Enter для возврата в меню...")
 
-def search_by_category():
+def show_search_by_category():
 
     categories = get_categories_with_years()
 
@@ -131,11 +144,108 @@ def search_by_category():
         print("\nНичего не найдено.")
     else:
 
-        for item in categories:
+        for index, item in enumerate(categories, start=1):
+            print(
+                f"{index:2}. " # номер занимает 2 символа.
+                f"{item['category']:<15} " # название жанра выравнивается по левому краю в поле шириной 15 символов
+                f"({item['first_year']} - {item['last_year']})"
+            )
 
-              print(f"{item['category']} ({item['first_year']} - {item['last_year']})")
+        choice = int(input("\nВведите номер жанра: ")) # выбор жанра
+
+        selected = categories[choice - 1] # выбранный жанр (словарь!)
+        category_id = selected["category_id"]
+        category_name = selected["category"]
+        first_year = selected["first_year"]
+        last_year = selected["last_year"]
+
+        print(f"\nВыбран жанр: {category_name}")
+        print(f"Доступные годы: {first_year} - {last_year}")
+        year_from = int(
+            input(f"\nВведите начальный год ({first_year}-{last_year}): ")
+        )
+
+        year_to = int(
+            input(f"Введите конечный год ({first_year}-{last_year}): ")
+        )
+
+        films = get_films_by_category_id_and_year(
+            category_id,
+            year_from,
+            year_to
+        )
+
+        if not films:
+            print("\nНичего не найдено.")
+        else:
+            for film in films:
+                print(f"{film['title']} ({film['release_year']})")
+
+        save_search_log(
+            search_type="category_name_and_year",
+            search_params={
+                "category_name": category_name,
+                "year_from": year_from,
+                "year_to": year_to,
+            },
+            results_count=len(films),
+        )
 
     #input("\nНажмите Enter для возврата в меню...")
+
+def show_recent_searches():
+    try:
+        results_number = int(input("\nВведите желаемое количество запросов: "))
+    except ValueError:
+        print("Введите целое число.")
+        return
+    results = get_recent_searches(results_number)
+
+
+
+    if not results:
+        print("\nНичего не найдено.")
+    else:
+
+        table = Table(title="Последние запросы")
+
+        table.add_column("№", justify="right")
+        table.add_column("Запрос")
+        table.add_column("Найдено фильмов")
+        table.add_column("Время")
+
+        #print(results)
+        # for result in results:
+        #     print(f"{film['title']} ({film['release_year']})")
+
+        for index, item in enumerate(results, start=1):
+
+            if item["search_type"] == "keyword":
+                #query = item["search_params"]["keyword"]
+                query = f'Ключевое слово: "{item["search_params"]["keyword"]}"'
+                print(query)
+
+            elif item["search_type"] == "category_name_and_year":
+                p = item["search_params"]
+                #query = f'{p["category_name"]} ({p["year_from"]}-{p["year_to"]})'
+                query = (
+                    f'Жанр: {p["category_name"]} '
+                    f'({p["year_from"]}-{p["year_to"]})'0
+                )
+                print(query)
+
+            else:
+                query = str(item["search_params"])
+                print(query)
+
+            table.add_row(
+                str(index),
+                query,
+                str(item["results_count"]),
+                item["created_at"].strftime("%d.%m.%Y %H:%M"),
+            )
+
+        console.print(table)
 
 if __name__ == "__main__":
 
