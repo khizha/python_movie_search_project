@@ -5,8 +5,7 @@ from local_settings import dbconfig
 q_get_films_by_keyword = """
     SELECT title, description, release_year
     FROM film
-    WHERE title LIKE CONCAT('%', %s, '%') 
-    LIMIT 10;
+    WHERE title LIKE CONCAT('%', %s, '%'); 
     """
 
 # спиcок фильмов конкретной категории (по имени категории) в указанном промежутке лет
@@ -51,6 +50,23 @@ q_get_categories_list = """
     FROM category
     ORDER BY name ASC;
     """
+
+#  список "жанр + минимальный год + максимальный год"
+q_get_categories_with_years = """
+    SELECT
+        c.category_id,
+        c.name AS category,
+        MIN(f.release_year) AS first_year,
+        MAX(f.release_year) AS last_year
+    FROM category AS c
+    JOIN film_category AS fc
+        ON c.category_id = fc.category_id
+    JOIN film AS f
+        ON fc.film_id = f.film_id
+    GROUP BY c.category_id, c.name
+    ORDER BY c.name ASC;
+"""
+
 def connect():
     """
     функция подключения к базе данных
@@ -126,3 +142,9 @@ def get_years():
 def get_categories():
     """Функция получения списка жанров фильмов."""
     return execute_query(q_get_categories_list)
+
+def get_categories_with_years():
+    """ Поиск списка фильмов по ключевому слову"""
+    return execute_query(
+        q_get_categories_with_years
+    )
