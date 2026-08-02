@@ -214,15 +214,11 @@ def show_search_by_keyword():
         console.input("\nНажмите Enter для возврата в меню...")
         return
 
-    try:
-        save_search_log(
-            search_type="keyword",
-            search_params={"keyword": keyword},
-            results_count=len(films)
-        )
-    except PyMongoError: # если MongoDB не работает, поиск выполнен, но история не сохранится
-        console.print("\nНе удалось сохранить информацию о поисковом запросе."
-        )
+    save_search_log(
+        search_type="keyword",
+        search_params={"keyword": keyword},
+        results_count=len(films)
+    )
 
     show_films_in_pages(films)
 

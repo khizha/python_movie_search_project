@@ -11,6 +11,27 @@ from local_settings import (
     MONGODB_COLLECTION,
 )
 
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
+
+file_handler = logging.FileHandler(
+    "error.log",
+    encoding="utf-8",
+    delay=True  # объект обработчика создаётся; файл не создаётся сразу, а появится только при первой записи через logger.error().
+)
+
+file_handler.setLevel(logging.ERROR)
+
+formatter = logging.Formatter(
+    "%(asctime)s %(levelname)s %(message)s"
+)
+
+file_handler.setFormatter(formatter)
+
+if not logger.handlers:
+    logger.addHandler(file_handler)
 
 def connect() -> MongoClient:
     """
@@ -38,7 +59,26 @@ def get_collection() -> tuple[MongoClient, Collection]:
     collection = db[MONGODB_COLLECTION]
     return client, collection
 
+def log_mongo_errors(func):
+    """
+    Декоратор для обработки ошибок MongoDB.
 
+    Если при выполнении функции возникает ошибка PyMongo,
+    она записывается в лог-файл, после чего выполнение
+    программы продолжается.
+    """
+
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+
+        except PyMongoError as error:
+            logger.error(f"Ошибка MongoDB в функции {func.__name__}: {error}")
+            return None
+
+    return wrapper
+
+@log_mongo_errors
 def save_search_log(
     search_type: str,
     search_params: dict[str, Any],
