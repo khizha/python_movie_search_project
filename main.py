@@ -12,13 +12,19 @@ from rich.table import Table
 
 import os
 
-
 from mysql_connector import get_films_by_keyword
 from mysql_connector import get_categories_with_years
 from mysql_connector import get_films_by_category_id_and_year
 
 from mongo_logger import get_recent_searches
 from mongo_logger import save_search_log
+from mongo_logger import get_popular_searches
+
+SEARCH_TYPE_NAMES = {
+    "keyword": "Ключевое слово",
+    "category_name_and_year": "Жанр и годы",
+    "category_id_and_year": "ID жанра и годы",
+}
 
 # Создаем объект консоли
 # Через него будем выводить все элементы Rich
@@ -100,15 +106,13 @@ def main() -> None:
 
         elif choice == "2":
             show_search_by_category()
-            #pass
+
 
         elif choice == "3":
             show_recent_searches()
-            #pass
 
         elif choice == "4":
-            #show_categories()
-            pass
+            show_popular_searches()
 
         elif choice == "0":
             clear_screen()
@@ -116,7 +120,6 @@ def main() -> None:
             break
 
         console.input("\nНажмите Enter для возврата в меню...")
-
 
 def show_search_by_keyword():
 
@@ -134,7 +137,6 @@ def show_search_by_keyword():
         for film in films:
             print(f"{film['title']} ({film['release_year']})")
 
-    #input("\nНажмите Enter для возврата в меню...")
 
 def show_search_by_category():
 
@@ -191,7 +193,53 @@ def show_search_by_category():
             results_count=len(films),
         )
 
-    #input("\nНажмите Enter для возврата в меню...")
+
+def format_search_params(item: dict) -> str:
+    """
+    Формирует строку параметры поискового запроса в кратком виде.
+
+    :param item: словарь с информацией о поисковом запросе.
+    :return: строка с параметрами поиска.
+    """
+
+    p = item["search_params"]
+
+    if item["search_type"] == "keyword":
+        return p["keyword"]
+
+    elif item["search_type"] == "category_name_and_year":
+        return f'{p["category_name"]} ({p["year_from"]}-{p["year_to"]})'
+
+    elif item["search_type"] == "category_id_and_year":
+        return f'{p["category_id"]} ({p["year_from"]}-{p["year_to"]})'
+
+    return str(p)
+
+
+def format_search_description(item: dict) -> str:
+    """
+    Возвращает поисковый запрос в удобном для пользователя виде.
+    """
+
+    p = item["search_params"]
+
+    if item["search_type"] == "keyword":
+        return f'Ключевое слово: "{p["keyword"]}"'
+
+    elif item["search_type"] == "category_name_and_year":
+        return (
+            f'Жанр: {p["category_name"]} '
+            f'({p["year_from"]}-{p["year_to"]})'
+        )
+
+    elif item["search_type"] == "category_id_and_year":
+        return (
+            f'ID жанра: {p["category_id"]} '
+            f'({p["year_from"]}-{p["year_to"]})'
+        )
+
+    return str(p)
+
 
 def show_recent_searches():
     try:
@@ -201,8 +249,6 @@ def show_recent_searches():
         return
     results = get_recent_searches(results_number)
 
-
-
     if not results:
         print("\nНичего не найдено.")
     else:
@@ -210,42 +256,59 @@ def show_recent_searches():
         table = Table(title="Последние запросы")
 
         table.add_column("№", justify="right")
-        table.add_column("Запрос")
+        table.add_column("Тип запроса")
+        table.add_column("Параметры")
         table.add_column("Найдено фильмов")
         table.add_column("Время")
 
-        #print(results)
-        # for result in results:
-        #     print(f"{film['title']} ({film['release_year']})")
-
         for index, item in enumerate(results, start=1):
 
-            if item["search_type"] == "keyword":
-                #query = item["search_params"]["keyword"]
-                query = f'Ключевое слово: "{item["search_params"]["keyword"]}"'
-                print(query)
+            #query = format_search_description(item)
 
-            elif item["search_type"] == "category_name_and_year":
-                p = item["search_params"]
-                #query = f'{p["category_name"]} ({p["year_from"]}-{p["year_to"]})'
-                query = (
-                    f'Жанр: {p["category_name"]} '
-                    f'({p["year_from"]}-{p["year_to"]})'0
-                )
-                print(query)
-
-            else:
-                query = str(item["search_params"])
-                print(query)
+            search_type = SEARCH_TYPE_NAMES[item["search_type"]]
+            query = format_search_params(item)
 
             table.add_row(
                 str(index),
+                search_type,
                 query,
                 str(item["results_count"]),
                 item["created_at"].strftime("%d.%m.%Y %H:%M"),
             )
 
         console.print(table)
+
+
+def show_popular_searches():
+    results = get_popular_searches()
+    # print(results)
+
+    if not results:
+        print("\nНичего не найдено.")
+    else:
+
+        table = Table(title="Top-5 популярных запросов")
+
+        table.add_column("№", justify="right")
+        table.add_column("Тип запроса")
+        table.add_column("Параметры")
+        table.add_column("Количество запросов")
+
+        for index, item in enumerate(results, start=1):
+
+            search_type = SEARCH_TYPE_NAMES[item["search_type"]]
+            query = format_search_params(item)
+
+            table.add_row(
+                str(index),
+                #item["search_type"],
+                search_type,
+                query,
+                str(item["requests_count"]),
+            )
+
+        console.print(table)
+
 
 if __name__ == "__main__":
 
