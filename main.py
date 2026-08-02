@@ -110,16 +110,60 @@ def main() -> None:
 
         elif choice == "3":
             show_recent_searches()
+            console.input("\nНажмите Enter для возврата в меню...")
 
         elif choice == "4":
             show_popular_searches()
+            console.input("\nНажмите Enter для возврата в меню...")
+
 
         elif choice == "0":
             clear_screen()
             print("До свидания!")
             break
 
-        console.input("\nНажмите Enter для возврата в меню...")
+        #console.input("\nНажмите Enter для возврата в меню...")
+
+def show_films_in_pages(films):
+    """
+    Показывает фильмы порциями по 10 штук.
+    Пользователь может запросить следующую страницу
+    или вернуться в меню.
+    """
+
+    if not films:
+        print("\nНичего не найдено.")
+        input("\nНажмите Enter для возврата в меню...")
+        return
+
+    page_size = 10
+    start = 0
+
+    while start < len(films):
+
+        end = start + page_size
+
+        print(
+            f"\nПоказаны фильмы {start + 1}-{min(end, len(films))}"
+            f" из {len(films)}"
+        )
+
+        for film in films[start:end]:
+            print(
+                f"{film['title']} ({film['release_year']})"
+            )
+
+        start = end
+
+        # если это была последняя страница
+        if start >= len(films):
+            input("\nНажмите Enter для возврата в меню...")
+            break
+
+        choice = input("\nПоказать следующие 10 фильмов? (Enter — да, 0 — меню): ")
+
+        if choice  == "0":
+            break
 
 def show_search_by_keyword():
 
@@ -131,12 +175,13 @@ def show_search_by_keyword():
         search_params={"keyword": keyword},
         results_count=len(films)
     )
-    if not films:
-        print("\nНичего не найдено.")
-    else:
-        for film in films:
-            print(f"{film['title']} ({film['release_year']})")
+    # if not films:
+    #     print("\nНичего не найдено.")
+    # else:
+    #     for film in films:
+    #         print(f"{film['title']} ({film['release_year']})")
 
+    show_films_in_pages(films)
 
 def show_search_by_category():
 
@@ -177,11 +222,13 @@ def show_search_by_category():
             year_to
         )
 
-        if not films:
-            print("\nНичего не найдено.")
-        else:
-            for film in films:
-                print(f"{film['title']} ({film['release_year']})")
+        show_films_in_pages(films)
+
+        # if not films:
+        #     print("\nНичего не найдено.")
+        # else:
+        #     for film in films:
+        #         print(f"{film['title']} ({film['release_year']})")
 
         save_search_log(
             search_type="category_name_and_year",
