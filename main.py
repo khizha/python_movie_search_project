@@ -153,17 +153,21 @@ def show_films_in_pages(films):
                 f"{film['title']} ({film['release_year']})"
             )
 
-        start = end
-
-        # если это была последняя страница
-        if start >= len(films):
+        # если показали последнюю страницу
+        if end >= len(films):
+            print("\n-=Конец списка.=-")
             input("\nНажмите Enter для возврата в меню...")
             break
 
-        choice = input("\nПоказать следующие 10 фильмов? (Enter — да, 0 — меню): ")
+        choice = input(
+            "\nПоказать следующие 10 фильмов? (Enter — да, 0 — меню): "
+        )
 
-        if choice  == "0":
+        if choice == "0":
             break
+
+        start = end
+
 
 def show_search_by_keyword():
 
@@ -175,11 +179,6 @@ def show_search_by_keyword():
         search_params={"keyword": keyword},
         results_count=len(films)
     )
-    # if not films:
-    #     print("\nНичего не найдено.")
-    # else:
-    #     for film in films:
-    #         print(f"{film['title']} ({film['release_year']})")
 
     show_films_in_pages(films)
 
@@ -223,12 +222,6 @@ def show_search_by_category():
         )
 
         show_films_in_pages(films)
-
-        # if not films:
-        #     print("\nНичего не найдено.")
-        # else:
-        #     for film in films:
-        #         print(f"{film['title']} ({film['release_year']})")
 
         save_search_log(
             search_type="category_name_and_year",
