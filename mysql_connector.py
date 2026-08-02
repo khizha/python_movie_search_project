@@ -5,7 +5,8 @@ from local_settings import dbconfig
 q_get_films_by_keyword = """
     SELECT title, description, release_year
     FROM film
-    WHERE title LIKE CONCAT('%', %s, '%'); 
+    WHERE title LIKE CONCAT('%', %s, '%') 
+    ORDER BY title;
     """
 
 # спиcок фильмов конкретной категории (по имени категории) в указанном промежутке лет
@@ -21,8 +22,7 @@ q_get_films_by_category_name_and_years = """
         ON fc.category_id = c.category_id
     WHERE c.name = %s
         AND f.release_year BETWEEN %s AND %s
-    ORDER BY release_year ASC 
-    LIMIT 10;
+    ORDER BY title;
     """
 
 # спиcок фильмов конкретной категории (по id категории) в указанном промежутке лет
@@ -33,8 +33,7 @@ q_get_by_category_id_and_year = """
         USING (film_id)
     WHERE category_id = %s
         AND release_year BETWEEN %s AND %s
-    ORDER BY release_year ASC 
-    LIMIT 10;
+    ORDER BY title;    
     """
 
 # список годов, упорядоченный по возрастанию
