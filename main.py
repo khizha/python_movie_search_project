@@ -99,7 +99,7 @@ def main() -> None:
         clear_screen()
         show_menu()
 
-        choice = input("\nВыберите пункт меню: ")
+        choice = console.input("\nВыберите пункт меню: ")
 
         if choice == "1":
             show_search_by_keyword()
@@ -119,7 +119,7 @@ def main() -> None:
 
         elif choice == "0":
             clear_screen()
-            console.print("До свидания!")
+            # console.print("До свидания!")
             break
 
         #console.input("\nНажмите Enter для возврата в меню...")
@@ -133,7 +133,7 @@ def show_films_in_pages(films):
 
     if not films:
         console.print("\nНичего не найдено.")
-        input("\nНажмите Enter для возврата в меню...")
+        console.input("\nНажмите Enter для возврата в меню...")
         return
 
     page_size = 10
@@ -170,10 +170,10 @@ def show_films_in_pages(films):
         # если показали последнюю страницу
         if end >= len(films):
             console.print("\n-=Конец списка.=-")
-            input("\nНажмите Enter для возврата в меню...")
+            console.input("\nНажмите Enter для возврата в меню...")
             break
 
-        choice = input(
+        choice = console.input(
             "\nПоказать следующие 10 фильмов? (Enter — да, 0 — меню): "
         )
 
@@ -185,7 +185,7 @@ def show_films_in_pages(films):
 
 def show_search_by_keyword():
 
-    keyword = input("\nВведите ключевое слово: ")
+    keyword = console.input("\nВведите ключевое слово: ")
     films = get_films_by_keyword(keyword)
 
     save_search_log(
@@ -226,7 +226,7 @@ def show_search_by_category():
 
         console.print(table)
 
-        choice = int(input("\nВведите номер жанра: ")) # выбор жанра
+        choice = int(console.input("\nВведите номер жанра: ")) # выбор жанра
 
         selected = categories[choice - 1] # выбранный жанр (словарь!)
         category_id = selected["category_id"]
@@ -237,11 +237,11 @@ def show_search_by_category():
         console.print(f"\nВыбран жанр: {category_name}")
         console.print(f"Доступные годы: {first_year} - {last_year}")
         year_from = int(
-            input(f"\nВведите начальный год ({first_year}-{last_year}): ")
+            console.input(f"\nВведите начальный год ({first_year}-{last_year}): ")
         )
 
         year_to = int(
-            input(f"Введите конечный год ({first_year}-{last_year}): ")
+            console.input(f"Введите конечный год ({first_year}-{last_year}): ")
         )
 
         films = get_films_by_category_id_and_year(
@@ -312,7 +312,7 @@ def format_search_description(item: dict) -> str:
 
 def show_recent_searches():
     try:
-        results_number = int(input("\nВведите желаемое количество запросов: "))
+        results_number = int(console.input("\nВведите желаемое количество запросов: "))
     except ValueError:
         console.print("Введите целое число.")
         return
