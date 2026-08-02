@@ -119,7 +119,7 @@ def main() -> None:
 
         elif choice == "0":
             clear_screen()
-            print("До свидания!")
+            console.print("До свидания!")
             break
 
         #console.input("\nНажмите Enter для возврата в меню...")
@@ -132,7 +132,7 @@ def show_films_in_pages(films):
     """
 
     if not films:
-        print("\nНичего не найдено.")
+        console.print("\nНичего не найдено.")
         input("\nНажмите Enter для возврата в меню...")
         return
 
@@ -143,7 +143,7 @@ def show_films_in_pages(films):
 
         end = start + page_size
 
-        print(
+        console.print(
             f"\nПоказаны фильмы {start + 1}-{min(end, len(films))}"
             f" из {len(films)}"
         )
@@ -169,7 +169,7 @@ def show_films_in_pages(films):
 
         # если показали последнюю страницу
         if end >= len(films):
-            print("\n-=Конец списка.=-")
+            console.print("\n-=Конец списка.=-")
             input("\nНажмите Enter для возврата в меню...")
             break
 
@@ -201,7 +201,7 @@ def show_search_by_category():
     categories = get_categories_with_years()
 
     if not categories:
-        print("\nНичего не найдено.")
+        console.print("\nНичего не найдено.")
     else:
 
         # for index, item in enumerate(categories, start=1):
@@ -234,8 +234,8 @@ def show_search_by_category():
         first_year = selected["first_year"]
         last_year = selected["last_year"]
 
-        print(f"\nВыбран жанр: {category_name}")
-        print(f"Доступные годы: {first_year} - {last_year}")
+        console.print(f"\nВыбран жанр: {category_name}")
+        console.print(f"Доступные годы: {first_year} - {last_year}")
         year_from = int(
             input(f"\nВведите начальный год ({first_year}-{last_year}): ")
         )
@@ -314,12 +314,12 @@ def show_recent_searches():
     try:
         results_number = int(input("\nВведите желаемое количество запросов: "))
     except ValueError:
-        print("Введите целое число.")
+        console.print("Введите целое число.")
         return
     results = get_recent_searches(results_number)
 
     if not results:
-        print("\nНичего не найдено.")
+        console.print("\nНичего не найдено.")
     else:
 
         table = Table(title="Последние запросы")
@@ -353,7 +353,7 @@ def show_popular_searches():
     # print(results)
 
     if not results:
-        print("\nНичего не найдено.")
+        console.print("\nНичего не найдено.")
     else:
 
         table = Table(title="Top-5 популярных запросов")
