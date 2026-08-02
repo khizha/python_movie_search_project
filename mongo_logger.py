@@ -71,9 +71,6 @@ def save_search_log(
 
         collection.insert_one(document)
 
-    except PyMongoError as err:
-        print(f"Ошибка MongoDB: {err}")
-
     finally:
         if client:
             client.close()
@@ -128,10 +125,6 @@ def get_popular_searches() -> list[dict[str, Any]]:
 
         return list(result)
 
-    except PyMongoError as err:
-        print(f"Ошибка MongoDB: {err}")
-        return []
-
     finally:
         if client:
             client.close()
@@ -174,10 +167,6 @@ def get_recent_searches(limit: int = 5) -> list[dict[str, Any]]:
         result = collection.aggregate(pipeline)
 
         return list(result)
-
-    except PyMongoError as err:
-        print(f"Ошибка MongoDB: {err}")
-        return []
 
     finally:
         if client:

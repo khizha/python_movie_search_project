@@ -81,16 +81,21 @@ def execute_query(query, params=()):
     connection = None
     cursor = None
 
+    # Если в блоке try возникнет исключение (например,
+    # mysql.connector.Error или один из его подклассов),
+    # Python сначала выполнит блок finally, освободив
+    # ресурсы (закроет курсор и соединение), а затем
+    # автоматически передаст исключение вызывающему коду.
+    # Ловим:
+    # - не удалось подключиться(connect())
+    # - не удалось создать курсор(cursor())
+    # - ошибку SQL(execute())
+    # - любую другую ошибку, которую выбросил mysql.connector
     try:
         connection = connect()
         cursor = connection.cursor(dictionary=True)
-
         cursor.execute(query, params)
         return cursor.fetchall()
-
-    except mysql.connector.Error as err:
-        print(f"Ошибка MySQL: {err}")
-        return []
 
     finally:
         if cursor:

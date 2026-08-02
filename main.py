@@ -11,6 +11,8 @@ from rich.align import Align
 from rich.table import Table
 
 import os
+import mysql.connector
+from pymongo.errors import PyMongoError
 
 from mysql_connector import get_films_by_keyword
 from mysql_connector import get_categories_with_years
@@ -48,7 +50,7 @@ def show_menu():
     # Создаем текстовое содержимое меню
     menu = (
         "1. Поиск по ключевому слову\n"
-        "2. Поиск по жанру  и диапазону годов выпуска\n"
+        "2. Поиск по жанру и диапазону годов выпуска\n"
         #"3. Список годов\n"
         #"4. Список жанров\n"
         "3. Последние запросы\n"
@@ -99,7 +101,7 @@ def main() -> None:
         clear_screen()
         show_menu()
 
-        choice = console.input("\nВыберите пункт меню: ")
+        choice = console.input("\nВыберите пункт меню: ").strip()
 
         if choice == "1":
             show_search_by_keyword()
@@ -116,11 +118,14 @@ def main() -> None:
             show_popular_searches()
             console.input("\nНажмите Enter для возврата в меню...")
 
-
         elif choice == "0":
             clear_screen()
             # console.print("До свидания!")
             break
+
+        else:
+            console.print("\nНекорректный выбор. Попробуйте снова.")
+            console.input("\nНажмите Enter для продолжения...")
 
         #console.input("\nНажмите Enter для возврата в меню...")
 
@@ -173,43 +178,68 @@ def show_films_in_pages(films):
             console.input("\nНажмите Enter для возврата в меню...")
             break
 
-        choice = console.input(
-            "\nПоказать следующие 10 фильмов? (Enter — да, 0 — меню): "
-        )
+        while True:
+            choice = console.input(
+                "\nПоказать следующие 10 фильмов? (Enter — да, 0 — меню): "
+            ).strip()
 
-        if choice == "0":
-            break
+            if choice == "":
+                start = end
+                break
 
-        start = end
+            if choice == "0":
+                return
+
+            console.print("\nНекорректный выбор. Попробуйте снова.")
 
 
 def show_search_by_keyword():
 
-    keyword = console.input("\nВведите ключевое слово: ")
-    films = get_films_by_keyword(keyword)
+    keyword = console.input("\nВведите ключевое слово: ").strip()
 
-    save_search_log(
-        search_type="keyword",
-        search_params={"keyword": keyword},
-        results_count=len(films)
-    )
+    if not keyword:
+        console.print("\nКлючевое слово не может быть пустым.")
+        console.input("\nНажмите Enter для возврата в меню...")
+        return
+
+    try:
+        films = get_films_by_keyword(keyword)
+
+
+    except mysql.connector.Error as error:
+        console.print(
+            f"\nНе удалось выполнить поиск.\n"
+            f"Причина: {error}"
+        )
+        console.input("\nНажмите Enter для возврата в меню...")
+        return
+
+    try:
+        save_search_log(
+            search_type="keyword",
+            search_params={"keyword": keyword},
+            results_count=len(films)
+        )
+    except PyMongoError: # если MongoDB не работает, поиск выполнен, но история не сохранится
+        console.print("\nНе удалось сохранить информацию о поисковом запросе."
+        )
 
     show_films_in_pages(films)
 
 def show_search_by_category():
+    try:
+        categories = get_categories_with_years()
 
-    categories = get_categories_with_years()
+    except mysql.connector.Error:
+        console.print("\nНе удалось получить список жанров. Ошибка подключения к базе данных.")
+        console.input("\nНажмите Enter для возврата в меню...")
+        return
 
     if not categories:
         console.print("\nНичего не найдено.")
+        console.input("\nНажмите Enter для возврата в меню...")
+        return
     else:
-
-        # for index, item in enumerate(categories, start=1):
-        #     print(
-        #         f"{index:2}. " # номер занимает 2 символа.
-        #         f"{item['category']:<15} " # название жанра выравнивается по левому краю в поле шириной 15 символов
-        #         f"({item['first_year']} - {item['last_year']})"
-        #     )
 
         table = Table(title="Доступные жанры")
 
@@ -226,7 +256,18 @@ def show_search_by_category():
 
         console.print(table)
 
-        choice = int(console.input("\nВведите номер жанра: ")) # выбор жанра
+        # выбор жанра
+        while True:
+            try:
+                choice = int(console.input("\nВведите номер жанра: "))
+
+                if 1 <= choice <= len(categories):
+                    break
+
+                console.print("\nНекорректный выбор. Попробуйте снова.")
+
+            except ValueError:
+                console.print("\nВведите номер жанра цифрами.")
 
         selected = categories[choice - 1] # выбранный жанр (словарь!)
         category_id = selected["category_id"]
@@ -236,19 +277,59 @@ def show_search_by_category():
 
         console.print(f"\nВыбран жанр: {category_name}")
         console.print(f"Доступные годы: {first_year} - {last_year}")
-        year_from = int(
-            console.input(f"\nВведите начальный год ({first_year}-{last_year}): ")
-        )
 
-        year_to = int(
-            console.input(f"Введите конечный год ({first_year}-{last_year}): ")
-        )
+        while True:
+            try:
+                year_from = int(
+                    console.input(f"\nВведите начальный год ({first_year}-{last_year}): ")
+                )
 
-        films = get_films_by_category_id_and_year(
-            category_id,
-            year_from,
-            year_to
-        )
+                if first_year <= year_from <= last_year:
+                    break
+
+                console.print(f"\nВведите год в диапазоне {first_year}–{last_year}.")
+
+            except ValueError:
+                console.print("\nВведите год цифрами.")
+
+        while True:
+            try:
+                year_to = int(
+                    console.input(
+                        f"Введите конечный год ({first_year}-{last_year}): "
+                    )
+                )
+
+                if not first_year <= year_to <= last_year:
+                    console.print(
+                        f"\nВведите год в диапазоне {first_year}–{last_year}."
+                    )
+                    continue
+
+                if year_to < year_from:
+                    console.print(
+                        "\nКонечный год не может быть меньше начального."
+                    )
+                    continue
+
+                break
+
+            except ValueError:
+                console.print("\nВведите год цифрами.")
+
+        try:
+            films = get_films_by_category_id_and_year(
+                category_id,
+                year_from,
+                year_to
+            )
+
+        except mysql.connector.Error:
+            console.print(
+                "\nНе удалось выполнить поиск. Ошибка подключения к базе данных."
+            )
+            console.input("\nНажмите Enter для возврата в меню...")
+            return
 
         show_films_in_pages(films)
 
@@ -311,12 +392,27 @@ def format_search_description(item: dict) -> str:
 
 
 def show_recent_searches():
+    while True:
+        try:
+            results_number = int(console.input("\nВведите желаемое количество запросов: "))
+
+            if results_number > 0:
+                break
+
+            console.print("\nКоличество запросов должно быть больше нуля.")
+
+        except ValueError:
+            console.print("\nВведите целое число.")
+
     try:
-        results_number = int(console.input("\nВведите желаемое количество запросов: "))
-    except ValueError:
-        console.print("Введите целое число.")
+        results = get_recent_searches(results_number)
+
+    except PyMongoError:
+        console.print(
+            "\nНе удалось получить историю поиска."
+        )
+        console.input("\nНажмите Enter для возврата в меню...")
         return
-    results = get_recent_searches(results_number)
 
     if not results:
         console.print("\nНичего не найдено.")
@@ -349,8 +445,13 @@ def show_recent_searches():
 
 
 def show_popular_searches():
-    results = get_popular_searches()
-    # print(results)
+    try:
+        results = get_popular_searches()
+
+    except PyMongoError:
+        console.print("\nНе удалось получить список популярных запросов.")
+        console.input("\nНажмите Enter для возврата в меню...")
+        return
 
     if not results:
         console.print("\nНичего не найдено.")
