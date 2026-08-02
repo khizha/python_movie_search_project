@@ -148,10 +148,24 @@ def show_films_in_pages(films):
             f" из {len(films)}"
         )
 
-        for film in films[start:end]:
-            print(
-                f"{film['title']} ({film['release_year']})"
+        # for film in films[start:end]:
+            # print(
+            #     f"{film['title']} ({film['release_year']})"
+            # )
+        table = Table(title="Результаты поиска")
+
+        table.add_column("№", justify="right")
+        table.add_column("Название")
+        table.add_column("Год", justify="center")
+
+        for index, film in enumerate(films[start:end], start=start + 1):
+            table.add_row(
+    str(index),
+               film["title"],
+               str(film["release_year"]),
             )
+
+        console.print(table)
 
         # если показали последнюю страницу
         if end >= len(films):
@@ -190,12 +204,27 @@ def show_search_by_category():
         print("\nНичего не найдено.")
     else:
 
+        # for index, item in enumerate(categories, start=1):
+        #     print(
+        #         f"{index:2}. " # номер занимает 2 символа.
+        #         f"{item['category']:<15} " # название жанра выравнивается по левому краю в поле шириной 15 символов
+        #         f"({item['first_year']} - {item['last_year']})"
+        #     )
+
+        table = Table(title="Доступные жанры")
+
+        table.add_column("№", justify="right")
+        table.add_column("Жанр")
+        table.add_column("Годы", justify="center")
+
         for index, item in enumerate(categories, start=1):
-            print(
-                f"{index:2}. " # номер занимает 2 символа.
-                f"{item['category']:<15} " # название жанра выравнивается по левому краю в поле шириной 15 символов
-                f"({item['first_year']} - {item['last_year']})"
+            table.add_row(
+                str(index),
+                item["category"],
+                f'{item["first_year"]} – {item["last_year"]}',
             )
+
+        console.print(table)
 
         choice = int(input("\nВведите номер жанра: ")) # выбор жанра
 
