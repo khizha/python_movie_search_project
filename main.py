@@ -67,7 +67,7 @@ def show_menu():
         title="ПОИСК ФИЛЬМОВ",
 
         # Цвет рамки
-        border_style="green",
+        border_style="bright_white",
 
         # Фиксированная ширина панели в символах
         width=55,
