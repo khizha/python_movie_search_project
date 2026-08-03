@@ -1,7 +1,7 @@
 import mysql.connector
 from local_settings import dbconfig
 
-# список фильмов по ключевому слову
+# Поиск фильмов по ключевому слову
 q_get_films_by_keyword = """
     SELECT title, description, release_year
     FROM film
@@ -9,7 +9,7 @@ q_get_films_by_keyword = """
     ORDER BY title;
     """
 
-# спиcок фильмов конкретной категории (по имени категории) в указанном промежутке лет
+# Поиск фильмов по названию жанра в указанном диапазоне лет
 q_get_films_by_category_name_and_years = """
     SELECT f.title, 
         f.description, 
@@ -25,7 +25,7 @@ q_get_films_by_category_name_and_years = """
     ORDER BY title;
     """
 
-# спиcок фильмов конкретной категории (по id категории) в указанном промежутке лет
+# Поиск фильмов по ID жанра в указанном диапазоне лет
 q_get_by_category_id_and_year = """
     SELECT title, description, release_year, category_id
     FROM film AS f
@@ -36,21 +36,21 @@ q_get_by_category_id_and_year = """
     ORDER BY title;    
     """
 
-# список годов, упорядоченный по возрастанию
+# Список годов выпуска фильмов
 q_get_years_list = """
     SELECT DISTINCT release_year
     FROM film
     ORDER BY release_year ASC;
     """
 
-# список жанров фильмов
+# Список жанров
 q_get_categories_list = """
     SELECT name
     FROM category
     ORDER BY name ASC;
     """
 
-#  список "жанр + минимальный год + максимальный год"
+#  Список жанров с минимальным и максимальным годом выпуска фильмов
 q_get_categories_with_years = """
     SELECT
         c.category_id,
@@ -68,29 +68,31 @@ q_get_categories_with_years = """
 
 def connect():
     """
-    функция подключения к базе данных
-    использует распаковку словаря dbconfig в качестве параметра метода connect
-    :return:
+    Создает подключение к базе данных MySQL.
+
+    Использует параметры подключения,
+    указанные в словаре dbconfig.
+
+    :return: Объект подключения MySQL.
     """
     return mysql.connector.connect(**dbconfig)
 
 def execute_query(query, params=()):
     """
-    Выполняет SELECT-запрос и возвращает результат.
+    Выполняет SELECT-запрос к базе данных.
+
+    Создает подключение, выполняет запрос
+    с указанными параметрами и возвращает
+    результат в виде списка словарей.
+
+    :param query: SQL-запрос.
+    :param params: Параметры SQL-запроса.
+    :return: Список строк результата.
     """
     connection = None
     cursor = None
 
-    # Если в блоке try возникнет исключение (например,
-    # mysql.connector.Error или один из его подклассов),
-    # Python сначала выполнит блок finally, освободив
-    # ресурсы (закроет курсор и соединение), а затем
-    # автоматически передаст исключение вызывающему коду.
-    # Ловим:
-    # - не удалось подключиться(connect())
-    # - не удалось создать курсор(cursor())
-    # - ошибку SQL(execute())
-    # - любую другую ошибку, которую выбросил mysql.connector
+    # Освобождаем ресурсы независимо от результата выполнения запроса.
     try:
         connection = connect()
         cursor = connection.cursor(dictionary=True)
@@ -106,7 +108,13 @@ def execute_query(query, params=()):
 
 
 def get_films_by_keyword(keyword):
-    """ Поиск списка фильмов по ключевому слову"""
+    """
+    Возвращает список фильмов,
+    название которых содержит указанное ключевое слово.
+
+    :param keyword: Ключевое слово для поиска.
+    :return: Список найденных фильмов.
+    """
     return execute_query(
         q_get_films_by_keyword,
         (keyword,)
@@ -114,11 +122,13 @@ def get_films_by_keyword(keyword):
 
 def get_films_by_category_id_and_year(category_id, year_from, year_to):
     """
-    функция получения списка фильмов по ID жанра и году
-    :param category_id:
-    :param year_from:
-    :param year_to:
-    :return:
+    Возвращает список фильмов выбранного жанра
+    за указанный диапазон лет.
+
+    :param category_id: Идентификатор жанра.
+    :param year_from: Начальный год.
+    :param year_to: Конечный год.
+    :return: Список найденных фильмов.
     """
     return execute_query(
         q_get_by_category_id_and_year,
@@ -128,11 +138,13 @@ def get_films_by_category_id_and_year(category_id, year_from, year_to):
 
 def get_films_by_category_name_and_year(category_name, year_from, year_to):
     """
-    функция получения списка фильмов по имени жанра и году
-    :param category_id:
-    :param year_from:
-    :param year_to:
-    :return:
+    Возвращает список фильмов выбранного жанра
+    за указанный диапазон лет.
+
+    :param category_name: Название жанра.
+    :param year_from: Начальный год.
+    :param year_to: Конечный год.
+    :return: Список найденных фильмов.
     """
     return execute_query(
         q_get_films_by_category_name_and_years,
@@ -140,15 +152,28 @@ def get_films_by_category_name_and_year(category_name, year_from, year_to):
     )
 
 def get_years():
-    """Функция получения списка годов выпуска фильмов."""
+    """
+    Возвращает список годов выпуска фильмов.
+
+    :return: Список годов.
+    """
     return execute_query(q_get_years_list)
 
 def get_categories():
-    """Функция получения списка жанров фильмов."""
+    """
+    Возвращает список жанров.
+
+    :return: Список жанров.
+    """
     return execute_query(q_get_categories_list)
 
 def get_categories_with_years():
-    """ Поиск списка фильмов по ключевому слову"""
+    """
+    Возвращает список жанров
+    с минимальным и максимальным годом выпуска фильмов.
+
+    :return: Список жанров с диапазоном годов.
+    """
     return execute_query(
         q_get_categories_with_years
     )
