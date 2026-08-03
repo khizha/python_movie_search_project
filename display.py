@@ -1,15 +1,17 @@
-# Table создает таблицы
 from rich.table import Table
 from ui_utils import console, wait_for_enter
 
 
 def show_films_in_pages(films):
     """
-    Показывает фильмы порциями по 10 штук.
-    Пользователь может запросить следующую страницу
-    или вернуться в меню.
-    """
+    Показывает фильмы постранично.
 
+    Выводит фильмы по 10 записей.
+    Пользователь может перейти к следующей странице
+    или вернуться в меню.
+
+    :param films: Список фильмов для отображения.
+    """
     if not films:
         console.print("\nНичего не найдено.")
         wait_for_enter()
@@ -42,7 +44,7 @@ def show_films_in_pages(films):
 
         console.print(table)
 
-        # если показали последнюю страницу
+        # После последней страницы возвращаем пользователя в меню
         if end >= len(films):
             console.print("\n-=Конец списка.=-")
             wait_for_enter()
