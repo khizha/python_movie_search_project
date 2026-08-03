@@ -1,4 +1,4 @@
-from ui_utils import  console, wait_for_enter
+from ui_utils import console, wait_for_enter
 
 from search_handlers import (
     show_search_by_keyword,
@@ -14,7 +14,10 @@ from history import (
 
 def main() -> None:
     """
-    Запускает главное меню приложения.
+    Запускает основной цикл приложения.
+
+    Показывает меню и вызывает обработчики
+    выбранных пользователем действий.
     """
 
     while True:
@@ -30,7 +33,6 @@ def main() -> None:
         elif choice == "2":
             show_search_by_category()
 
-
         elif choice == "3":
             show_recent_searches()
             wait_for_enter()
@@ -41,7 +43,6 @@ def main() -> None:
 
         elif choice == "0":
             clear_screen()
-            # console.print("До свидания!")
             break
 
         else:
