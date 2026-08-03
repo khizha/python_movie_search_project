@@ -11,6 +11,12 @@ from ui_utils import console, wait_for_enter
 from validators import get_integer
 
 def show_recent_searches():
+    """
+    Показывает последние поисковые запросы из MongoDB.
+
+    Пользователь указывает количество записей,
+    после чего результаты выводятся в виде таблицы.
+    """
     while True:
         results_number = get_integer(
             "\nВведите желаемое количество запросов: "
@@ -34,7 +40,6 @@ def show_recent_searches():
     if not results:
         console.print("\nНичего не найдено.")
     else:
-
         table = Table(title="Последние запросы")
 
         table.add_column("№", justify="right")
@@ -60,6 +65,11 @@ def show_recent_searches():
 
 
 def show_popular_searches():
+    """
+    Показывает самые популярные поисковые запросы из MongoDB.
+
+    Результаты сортируются и выводятся в виде таблицы.
+    """
     try:
         results = get_popular_searches()
 
@@ -86,7 +96,6 @@ def show_popular_searches():
 
             table.add_row(
                 str(index),
-                #item["search_type"],
                 search_type,
                 query,
                 str(item["requests_count"]),
