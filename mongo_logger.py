@@ -12,6 +12,7 @@ from local_settings import (
 )
 
 import logging
+from functools import wraps
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
@@ -59,24 +60,6 @@ def get_collection() -> tuple[MongoClient, Collection]:
     collection = db[MONGODB_COLLECTION]
     return client, collection
 
-# def log_mongo_errors(func):
-#     """
-#     Декоратор для обработки ошибок MongoDB.
-#
-#     Если при выполнении функции возникает ошибка PyMongo,
-#     она записывается в лог-файл, после чего выполнение
-#     программы продолжается.
-#     """
-#
-#     def wrapper(*args, **kwargs):
-#         try:
-#             return func(*args, **kwargs)
-#
-#         except PyMongoError as error:
-#             logger.error(f"Ошибка MongoDB в функции {func.__name__}: {error}")
-#             return None
-#
-#     return wrapper
 
 def log_mongo_errors(default_return):
     """
@@ -86,6 +69,7 @@ def log_mongo_errors(default_return):
 
     def decorator(func):
 
+        @wraps(func)
         def wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
