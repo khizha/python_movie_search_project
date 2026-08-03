@@ -66,7 +66,7 @@ q_get_categories_with_years = """
     ORDER BY c.name ASC;
 """
 
-def connect():
+def connect() -> mysql.connector.MySQLConnection:
     """
     Создает подключение к базе данных MySQL.
 
@@ -76,6 +76,7 @@ def connect():
     :return: Объект подключения MySQL.
     """
     return mysql.connector.connect(**dbconfig)
+
 
 def execute_query(query, params=()):
     """
@@ -92,7 +93,7 @@ def execute_query(query, params=()):
     connection = None
     cursor = None
 
-    # Освобождаем ресурсы независимо от результата выполнения запроса.
+    # Закрываем соединение и курсор после выполнения запроса
     try:
         connection = connect()
         cursor = connection.cursor(dictionary=True)
@@ -119,6 +120,7 @@ def get_films_by_keyword(keyword):
         q_get_films_by_keyword,
         (keyword,)
     )
+
 
 def get_films_by_category_id_and_year(category_id, year_from, year_to):
     """
@@ -151,6 +153,7 @@ def get_films_by_category_name_and_year(category_name, year_from, year_to):
         (category_name, year_from, year_to)
     )
 
+
 def get_years():
     """
     Возвращает список годов выпуска фильмов.
@@ -159,6 +162,7 @@ def get_years():
     """
     return execute_query(q_get_years_list)
 
+
 def get_categories():
     """
     Возвращает список жанров.
@@ -166,6 +170,7 @@ def get_categories():
     :return: Список жанров.
     """
     return execute_query(q_get_categories_list)
+
 
 def get_categories_with_years():
     """
