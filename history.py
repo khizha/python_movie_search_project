@@ -1,5 +1,4 @@
 from rich.table import Table
-from pymongo.errors import PyMongoError
 
 from constants import SEARCH_TYPE_NAMES
 from formatters import format_search_params
@@ -27,15 +26,7 @@ def show_recent_searches():
 
         console.print("\nКоличество запросов должно быть больше нуля.")
 
-    try:
-        results = get_recent_searches(results_number)
-
-    except PyMongoError:
-        console.print(
-            "\nНе удалось получить историю поиска."
-        )
-        wait_for_enter()
-        return
+    results = get_recent_searches(results_number)
 
     if not results:
         console.print("\nНичего не найдено.")
@@ -70,13 +61,7 @@ def show_popular_searches():
 
     Результаты сортируются и выводятся в виде таблицы.
     """
-    try:
-        results = get_popular_searches()
-
-    except PyMongoError:
-        console.print("\nНе удалось получить список популярных запросов.")
-        wait_for_enter()
-        return
+    results = get_popular_searches()
 
     if not results:
         console.print("\nНичего не найдено.")
