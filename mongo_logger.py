@@ -20,7 +20,7 @@ logger.setLevel(logging.ERROR)
 file_handler = logging.FileHandler(
     "error.log",
     encoding="utf-8",
-    delay=True  # объект обработчика создаётся; файл не создаётся сразу, а появится только при первой записи через logger.error().
+    delay=True  #  # Файл создается только при первой записи в лог
 )
 
 file_handler.setLevel(logging.ERROR)
@@ -47,13 +47,12 @@ def connect() -> MongoClient:
 
 def get_collection() -> tuple[MongoClient, Collection]:
     """
-        Возвращает подключение к MongoDB и коллекцию для хранения истории поиска.
+    Возвращает подключение к MongoDB и коллекцию.
 
-        Подключается к серверу MongoDB, открывает базу данных,
-        указанную в настройках проекта, и возвращает объект коллекции.
-        Закрытие подключения выполняется вызывающей функцией.
+    Создает подключение к серверу, открывает указанную
+    в настройках базу данных и возвращает объект коллекции.
 
-        :return: Кортеж, содержащий объект клиента MongoDB и объект коллекции.
+    :return: Кортеж (client, collection).
     """
     client = connect()
     db = client[DATABASE_WRITE]
@@ -64,7 +63,11 @@ def get_collection() -> tuple[MongoClient, Collection]:
 def log_mongo_errors(default_return):
     """
     Декоратор для обработки ошибок MongoDB.
-    Возвращает указанное значение при ошибке.
+
+    Перехватывает исключения PyMongoError,
+    записывает информацию об ошибке в лог
+    и возвращает значение, указанное
+    в параметре default_return.
     """
 
     def decorator(func):
@@ -138,7 +141,7 @@ def get_popular_searches() -> list[dict[str, Any]]:
     try:
         client, collection = get_collection()
 
-        # aggregation pipeline
+        # aggregation pipeline для подсчета популярных запросов
         pipeline = [
             {
                 "$group": {
