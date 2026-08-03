@@ -15,7 +15,15 @@ from display import show_films_in_pages
 
 from mongo_logger import save_search_log
 
+
 def show_search_by_keyword():
+    """
+    Выполняет поиск фильмов по ключевому слову.
+
+    Получает запрос пользователя, выполняет поиск
+    в базе данных, сохраняет информацию о запросе
+    и выводит результаты.
+    """
 
     keyword = console.input("\nВведите ключевое слово: ").strip()
 
@@ -44,6 +52,13 @@ def show_search_by_keyword():
     show_films_in_pages(films)
 
 def show_search_by_category():
+    """
+    Выполняет поиск фильмов по жанру и диапазону годов.
+
+    Пользователь выбирает жанр и период,
+    после чего результаты сохраняются
+    в истории поиска и выводятся на экран.
+    """
     try:
         categories = get_categories()
 
@@ -73,7 +88,6 @@ def show_search_by_category():
 
         console.print(table)
 
-        # выбор жанра
         choice = get_integer_in_range(
             "\nВведите номер жанра: ",
             1,
@@ -81,7 +95,8 @@ def show_search_by_category():
             "Некорректный выбор. Попробуйте снова.",
         )
 
-        selected = categories[choice - 1] # выбранный жанр (словарь!)
+        # Выбранный жанр содержит id, название и диапазон годов (словарь)
+        selected = categories[choice - 1]
         category_id = selected["category_id"]
         category_name = selected["category"]
         first_year = selected["first_year"]
