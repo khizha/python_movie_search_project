@@ -10,6 +10,7 @@ from rich.table import Table
 from ui_utils import  console, wait_for_enter
 from validators import get_integer, get_integer_in_range
 from constants import SEARCH_TYPE_NAMES
+from formatters import format_search_params
 
 import os
 import mysql.connector
@@ -307,53 +308,6 @@ def show_search_by_category():
             },
             results_count=len(films),
         )
-
-
-def format_search_params(item: dict) -> str:
-    """
-    Формирует строку параметры поискового запроса в кратком виде.
-
-    :param item: словарь с информацией о поисковом запросе.
-    :return: строка с параметрами поиска.
-    """
-
-    p = item["search_params"]
-
-    if item["search_type"] == "keyword":
-        return p["keyword"]
-
-    elif item["search_type"] == "category_name_and_year":
-        return f'{p["category_name"]} ({p["year_from"]}-{p["year_to"]})'
-
-    elif item["search_type"] == "category_id_and_year":
-        return f'{p["category_id"]} ({p["year_from"]}-{p["year_to"]})'
-
-    return str(p)
-
-
-def format_search_description(item: dict) -> str:
-    """
-    Возвращает поисковый запрос в удобном для пользователя виде.
-    """
-
-    p = item["search_params"]
-
-    if item["search_type"] == "keyword":
-        return f'Ключевое слово: "{p["keyword"]}"'
-
-    elif item["search_type"] == "category_name_and_year":
-        return (
-            f'Жанр: {p["category_name"]} '
-            f'({p["year_from"]}-{p["year_to"]})'
-        )
-
-    elif item["search_type"] == "category_id_and_year":
-        return (
-            f'ID жанра: {p["category_id"]} '
-            f'({p["year_from"]}-{p["year_to"]})'
-        )
-
-    return str(p)
 
 
 def show_recent_searches():
