@@ -59,26 +59,48 @@ def get_collection() -> tuple[MongoClient, Collection]:
     collection = db[MONGODB_COLLECTION]
     return client, collection
 
-def log_mongo_errors(func):
+# def log_mongo_errors(func):
+#     """
+#     Декоратор для обработки ошибок MongoDB.
+#
+#     Если при выполнении функции возникает ошибка PyMongo,
+#     она записывается в лог-файл, после чего выполнение
+#     программы продолжается.
+#     """
+#
+#     def wrapper(*args, **kwargs):
+#         try:
+#             return func(*args, **kwargs)
+#
+#         except PyMongoError as error:
+#             logger.error(f"Ошибка MongoDB в функции {func.__name__}: {error}")
+#             return None
+#
+#     return wrapper
+
+def log_mongo_errors(default_return):
     """
     Декоратор для обработки ошибок MongoDB.
-
-    Если при выполнении функции возникает ошибка PyMongo,
-    она записывается в лог-файл, после чего выполнение
-    программы продолжается.
+    Возвращает указанное значение при ошибке.
     """
 
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
+    def decorator(func):
 
-        except PyMongoError as error:
-            logger.error(f"Ошибка MongoDB в функции {func.__name__}: {error}")
-            return None
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
 
-    return wrapper
+            except PyMongoError as error:
+                logger.error(
+                    f"Ошибка MongoDB в функции {func.__name__}: {error}"
+                )
+                return default_return
 
-@log_mongo_errors
+        return wrapper
+
+    return decorator
+
+@log_mongo_errors(None)
 def save_search_log(
     search_type: str,
     search_params: dict[str, Any],
@@ -116,6 +138,7 @@ def save_search_log(
             client.close()
 
 
+@log_mongo_errors([])
 def get_popular_searches() -> list[dict[str, Any]]:
     """
     Возвращает список из пяти самых популярных поисковых запросов.
@@ -169,7 +192,7 @@ def get_popular_searches() -> list[dict[str, Any]]:
         if client:
             client.close()
 
-
+@log_mongo_errors([])
 def get_recent_searches(limit: int = 5) -> list[dict[str, Any]]:
     """
     Возвращает список последних поисковых запросов.
