@@ -11,14 +11,15 @@ from ui_utils import  console, wait_for_enter
 from validators import get_integer, get_integer_in_range
 from constants import SEARCH_TYPE_NAMES
 from formatters import format_search_params
+from search_service import (
+    search_by_keyword,
+    get_categories,
+    search_by_category,
+)
 
 import os
 import mysql.connector
 from pymongo.errors import PyMongoError
-
-from mysql_connector import get_films_by_keyword
-from mysql_connector import get_categories_with_years
-from mysql_connector import get_films_by_category_id_and_year
 
 from mongo_logger import get_recent_searches
 from mongo_logger import save_search_log
@@ -196,8 +197,7 @@ def show_search_by_keyword():
         return
 
     try:
-        films = get_films_by_keyword(keyword)
-
+        films = search_by_keyword(keyword)
 
     except mysql.connector.Error as error:
         console.print(
@@ -217,7 +217,7 @@ def show_search_by_keyword():
 
 def show_search_by_category():
     try:
-        categories = get_categories_with_years()
+        categories = get_categories()
 
     except mysql.connector.Error:
         console.print("\nНе удалось получить список жанров. Ошибка подключения к базе данных.")
@@ -284,10 +284,10 @@ def show_search_by_category():
             break
 
         try:
-            films = get_films_by_category_id_and_year(
+            films = search_by_category(
                 category_id,
                 year_from,
-                year_to
+                year_to,
             )
 
         except mysql.connector.Error:
