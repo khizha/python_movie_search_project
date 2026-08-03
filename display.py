@@ -27,10 +27,6 @@ def show_films_in_pages(films):
             f" из {len(films)}"
         )
 
-        # for film in films[start:end]:
-            # print(
-            #     f"{film['title']} ({film['release_year']})"
-            # )
         table = Table(title="Результаты поиска")
 
         table.add_column("№", justify="right")

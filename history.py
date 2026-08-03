@@ -45,8 +45,6 @@ def show_recent_searches():
 
         for index, item in enumerate(results, start=1):
 
-            #query = format_search_description(item)
-
             search_type = SEARCH_TYPE_NAMES[item["search_type"]]
             query = format_search_params(item)
 
