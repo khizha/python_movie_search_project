@@ -1,10 +1,4 @@
-# Panel создает рамку вокруг текста
-from rich.panel import Panel
-
 from rich.table import Table
-
-# Align отвечает за выравнивание текста и объектов
-from rich.align import Align
 
 from ui_utils import  console, wait_for_enter
 from validators import get_integer, get_integer_in_range
@@ -16,73 +10,14 @@ from search_service import (
     search_by_category,
 )
 from display import show_films_in_pages
+from menu import clear_screen, show_menu
 
-import os
 import mysql.connector
 from pymongo.errors import PyMongoError
 
 from mongo_logger import get_recent_searches
 from mongo_logger import save_search_log
 from mongo_logger import get_popular_searches
-
-
-def clear_screen():
-    """
-    Очищает экран терминала.
-    """
-    os.system("cls" if os.name == "nt" else "clear")
-
-
-def show_menu():
-    """
-    Выводит главное меню приложения.
-    """
-
-    # Очищаем консоль перед показом меню
-    #console.clear()
-
-    # Создаем текстовое содержимое меню
-    menu = (
-        "1. Поиск по ключевому слову\n"
-        "2. Поиск по жанру и диапазону годов выпуска\n"
-        #"3. Список годов\n"
-        #"4. Список жанров\n"
-        "3. Последние запросы\n"
-        "4. Популярные запросы\n"
-        "\n"
-        "0. Выход"
-    )
-
-    # Создаем объект Panel
-    # Panel отвечает только за внешний вид рамки
-    panel = Panel(
-        # Центрируем текст внутри панели
-        Align.center(menu),
-
-        # Заголовок
-        title="ПОИСК ФИЛЬМОВ",
-
-        # Цвет рамки
-        border_style="bright_white",
-
-        # Фиксированная ширина панели в символах
-        width=55,
-
-        # Внутренние отступы:
-        # сверху и снизу, слева и справа.
-        padding=(1, 4)
-    )
-
-    # Выводим готовую панель в консоль
-    console.print(
-
-        # Центрируем рамку (объект Panel)
-        Align(
-            panel,
-            align="center",
-            vertical="middle"
-        )
-    )
 
 
 def main() -> None:
