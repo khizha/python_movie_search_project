@@ -31,11 +31,11 @@ def main() -> None:
             show_search_by_category()
 
         elif choice == "3":
-            show_recent_searches()
+            show_popular_searches()
             wait_for_enter()
 
         elif choice == "4":
-            show_popular_searches()
+            show_recent_searches()
             wait_for_enter()
 
         elif choice == "0":
