@@ -5,6 +5,7 @@ from rich.panel import Panel
 
 from ui_utils import console
 
+
 def clear_screen():
     """
     Очищает экран терминала.
@@ -29,13 +30,9 @@ def show_menu():
     panel = Panel(
         # Центрируем текст внутри панели
         Align.center(menu),
-
         title="ПОИСК ФИЛЬМОВ",
-
         border_style="bright_white",
-
         width=55,
-
         # Внутренние отступы:
         # сверху и снизу, слева и справа.
         padding=(1, 4)
@@ -43,7 +40,6 @@ def show_menu():
 
     # Выводим готовую панель в консоль
     console.print(
-
         # Центрируем рамку (объект Panel)
         Align(
             panel,

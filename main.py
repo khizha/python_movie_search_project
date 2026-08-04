@@ -1,10 +1,8 @@
 from ui_utils import console, wait_for_enter
-
 from search_handlers import (
     show_search_by_keyword,
     show_search_by_category,
 )
-
 from menu import clear_screen, show_menu
 from history import (
     show_recent_searches,
@@ -21,7 +19,6 @@ def main() -> None:
     """
 
     while True:
-
         clear_screen()
         show_menu()
 

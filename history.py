@@ -9,6 +9,7 @@ from mongo_logger import (
 from ui_utils import console, wait_for_enter
 from validators import get_integer
 
+
 def show_recent_searches():
     """
     Показывает последние поисковые запросы из MongoDB.
@@ -40,7 +41,6 @@ def show_recent_searches():
         table.add_column("Время")
 
         for index, item in enumerate(results, start=1):
-
             search_type = SEARCH_TYPE_NAMES[item["search_type"]]
             query = format_search_params(item)
 
@@ -75,7 +75,6 @@ def show_popular_searches():
         table.add_column("Количество запросов")
 
         for index, item in enumerate(results, start=1):
-
             search_type = SEARCH_TYPE_NAMES[item["search_type"]]
             query = format_search_params(item)
 

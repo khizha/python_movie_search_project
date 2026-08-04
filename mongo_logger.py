@@ -1,4 +1,6 @@
+import logging
 from datetime import datetime
+from functools import wraps
 from typing import Any
 
 from pymongo import MongoClient
@@ -6,13 +8,10 @@ from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
 
 from local_settings import (
-    MONGODB_URL_WRITE,
     DATABASE_WRITE,
     MONGODB_COLLECTION,
+    MONGODB_URL_WRITE,
 )
-
-import logging
-from functools import wraps
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
@@ -20,7 +19,7 @@ logger.setLevel(logging.ERROR)
 file_handler = logging.FileHandler(
     "error.log",
     encoding="utf-8",
-    delay=True  #  # Файл создается только при первой записи в лог
+    delay=True   # Файл создается только при первой записи в лог
 )
 
 file_handler.setLevel(logging.ERROR)
@@ -33,6 +32,7 @@ file_handler.setFormatter(formatter)
 
 if not logger.handlers:
     logger.addHandler(file_handler)
+
 
 def connect() -> MongoClient:
     """
@@ -71,12 +71,10 @@ def log_mongo_errors(default_return):
     """
 
     def decorator(func):
-
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
-
             except PyMongoError as error:
                 logger.error(
                     f"Ошибка MongoDB в функции {func.__name__}: {error}"
@@ -86,6 +84,7 @@ def log_mongo_errors(default_return):
         return wrapper
 
     return decorator
+
 
 @log_mongo_errors(None)
 def save_search_log(
@@ -134,7 +133,8 @@ def get_popular_searches() -> list[dict[str, Any]]:
     Запрос считается одинаковым, если совпадают его тип (`search_type`)
     и параметры (`search_params`).
 
-    :return: Список словарей с информацией о популярных поисковых запросах.
+    :return: Список словарей с информацией о популярных поисковых
+    запросах.
     """
     client = None
 
@@ -178,6 +178,7 @@ def get_popular_searches() -> list[dict[str, Any]]:
     finally:
         if client:
             client.close()
+
 
 @log_mongo_errors([])
 def get_recent_searches(limit: int = 5) -> list[dict[str, Any]]:

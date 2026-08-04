@@ -1,18 +1,19 @@
 import mysql.connector
+
 from local_settings import dbconfig
 
 # Поиск фильмов по ключевому слову
-q_get_films_by_keyword = """
+GET_FILMS_BY_KEYWORD_QUERY = """
     SELECT title, description, release_year
     FROM film
-    WHERE title LIKE CONCAT('%', %s, '%') 
+    WHERE title LIKE CONCAT('%', %s, '%')
     ORDER BY title;
     """
 
 # Поиск фильмов по названию жанра в указанном диапазоне лет
-q_get_films_by_category_name_and_years = """
-    SELECT f.title, 
-        f.description, 
+GET_FILMS_BY_CATEGORY_NAME_AND_YEARS_QUERY = """
+    SELECT f.title,
+        f.description,
         f.release_year, 
         c.name AS category
     FROM film AS f
@@ -26,32 +27,32 @@ q_get_films_by_category_name_and_years = """
     """
 
 # Поиск фильмов по ID жанра в указанном диапазоне лет
-q_get_by_category_id_and_year = """
+GET_FILMS_BY_CATEGORY_ID_AND_YEAR_QUERY = """
     SELECT title, description, release_year, category_id
     FROM film AS f
     JOIN film_category AS fc
         USING (film_id)
     WHERE category_id = %s
         AND release_year BETWEEN %s AND %s
-    ORDER BY title;    
+    ORDER BY title;
     """
 
 # Список годов выпуска фильмов
-q_get_years_list = """
+GET_YEARS_QUERY = """
     SELECT DISTINCT release_year
     FROM film
     ORDER BY release_year ASC;
     """
 
 # Список жанров
-q_get_categories_list = """
+GET_CATEGORIES_QUERY = """
     SELECT name
     FROM category
     ORDER BY name ASC;
     """
 
 #  Список жанров с минимальным и максимальным годом выпуска фильмов
-q_get_categories_with_years = """
+GET_CATEGORIES_WITH_YEARS_QUERY = """
     SELECT
         c.category_id,
         c.name AS category,
@@ -65,6 +66,7 @@ q_get_categories_with_years = """
     GROUP BY c.category_id, c.name
     ORDER BY c.name ASC;
 """
+
 
 def connect() -> mysql.connector.MySQLConnection:
     """
@@ -117,7 +119,7 @@ def get_films_by_keyword(keyword):
     :return: Список найденных фильмов.
     """
     return execute_query(
-        q_get_films_by_keyword,
+        GET_FILMS_BY_KEYWORD_QUERY,
         (keyword,)
     )
 
@@ -133,7 +135,7 @@ def get_films_by_category_id_and_year(category_id, year_from, year_to):
     :return: Список найденных фильмов.
     """
     return execute_query(
-        q_get_by_category_id_and_year,
+        GET_FILMS_BY_CATEGORY_ID_AND_YEAR_QUERY,
         (category_id, year_from, year_to)
     )
 
@@ -149,7 +151,7 @@ def get_films_by_category_name_and_year(category_name, year_from, year_to):
     :return: Список найденных фильмов.
     """
     return execute_query(
-        q_get_films_by_category_name_and_years,
+        GET_FILMS_BY_CATEGORY_NAME_AND_YEARS_QUERY,
         (category_name, year_from, year_to)
     )
 
@@ -160,7 +162,7 @@ def get_years():
 
     :return: Список годов.
     """
-    return execute_query(q_get_years_list)
+    return execute_query(GET_YEARS_QUERY)
 
 
 def get_categories():
@@ -169,7 +171,7 @@ def get_categories():
 
     :return: Список жанров.
     """
-    return execute_query(q_get_categories_list)
+    return execute_query(GET_CATEGORIES_QUERY)
 
 
 def get_categories_with_years():
@@ -180,5 +182,5 @@ def get_categories_with_years():
     :return: Список жанров с диапазоном годов.
     """
     return execute_query(
-        q_get_categories_with_years
+        GET_CATEGORIES_WITH_YEARS_QUERY
     )

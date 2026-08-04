@@ -5,7 +5,7 @@ from mysql_connector import (
 )
 
 
-def search_by_keyword(keyword):
+def search_by_keyword(keyword) -> list[dict]:
     """
     Выполняет поиск фильмов по ключевому слову.
 
@@ -15,7 +15,7 @@ def search_by_keyword(keyword):
     return get_films_by_keyword(keyword)
 
 
-def get_categories():
+def get_categories() -> list[dict]:
     """
     Возвращает список жанров с диапазоном доступных годов.
 
@@ -24,7 +24,7 @@ def get_categories():
     return get_categories_with_years()
 
 
-def search_by_category(category_id, year_from, year_to):
+def search_by_category(category_id, year_from, year_to) -> list[dict]:
     """
     Выполняет поиск фильмов по жанру и диапазону годов.
 

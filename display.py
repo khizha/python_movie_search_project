@@ -1,8 +1,9 @@
 from rich.table import Table
+
 from ui_utils import console, wait_for_enter
 
 
-def show_films_in_pages(films):
+def show_films_in_pages(films) -> None:
     """
     Показывает фильмы постранично.
 
@@ -21,7 +22,6 @@ def show_films_in_pages(films):
     start = 0
 
     while start < len(films):
-
         end = start + page_size
 
         console.print(

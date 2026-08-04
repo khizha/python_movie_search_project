@@ -1,18 +1,14 @@
 import mysql.connector
-
 from rich.table import Table
 
 from ui_utils import console, wait_for_enter
 from validators import get_integer_in_range
-
 from search_service import (
     search_by_keyword,
     get_categories,
     search_by_category,
 )
-
 from display import show_films_in_pages
-
 from mongo_logger import save_search_log
 
 
@@ -51,6 +47,7 @@ def show_search_by_keyword():
 
     show_films_in_pages(films)
 
+
 def show_search_by_category():
     """
     Выполняет поиск фильмов по жанру и диапазону годов.
@@ -63,7 +60,10 @@ def show_search_by_category():
         categories = get_categories()
 
     except mysql.connector.Error:
-        console.print("\nНе удалось получить список жанров. Ошибка подключения к базе данных.")
+        console.print(
+            "\nНе удалось получить список жанров. "
+            "Ошибка подключения к базе данных."
+        )
         wait_for_enter()
         return
 
@@ -95,7 +95,7 @@ def show_search_by_category():
             "Некорректный выбор. Попробуйте снова.",
         )
 
-        # Выбранный жанр содержит id, название и диапазон годов (словарь)
+        # Выбранный жанр содержит id, название и диапазон лет (словарь)
         selected = categories[choice - 1]
         category_id = selected["category_id"]
         category_name = selected["category"]
@@ -135,7 +135,8 @@ def show_search_by_category():
 
         except mysql.connector.Error:
             console.print(
-                "\nНе удалось выполнить поиск. Ошибка подключения к базе данных."
+                "\nНе удалось выполнить поиск. "
+                "Ошибка подключения к базе данных."
             )
             wait_for_enter()
             return
